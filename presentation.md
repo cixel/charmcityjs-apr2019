@@ -12,6 +12,8 @@ footer: Ehden Sinai @ charmCityJs - 4/3/2019
 
 ### (But Reflect Does Not Alliterate)
 
+#### (So It Kinda Ruins the Title)
+
 ---
 
 [.autoscale: true]
@@ -91,7 +93,7 @@ node.js agent engineer @ Contrast Security
 
 ---
 
-## Terminology
+## Terminology 📖
 
 **target**: the object being wrapped
 
@@ -103,7 +105,11 @@ node.js agent engineer @ Contrast Security
 
 ^ [MAYBE DRINK HERE]
 
-^ describe them
+^ target is kinda self-explanatory
+
+^ traps are the methods that define your custom behavior, name comes from OS traps
+
+^ all the traps for the proxy collectively are the handler
 
 ^ "now let's see an example of this in action"
 
@@ -116,7 +122,7 @@ node.js agent engineer @ Contrast Security
 [.code-highlight: 22]
 [.code-highlight: all]
 
-^ here's an example of using a proxy to assimilate
+^ first time I used this slide was for a group of college students, and there reaction was like. there wasn't one. I think the reference was completely lost on them because they weren't old
 [BUILD]
 
 ^ person is the target
@@ -156,6 +162,56 @@ const handler = {
 const borg = new Proxy(person, handler);
 ```
 
+![right fit](borg.jpg)
+
+---
+
+#*"Star Trek is cool so we should add Proxy to the spec"*
+
+### --W3C, Ecma, and Brendan Eich
+
+#### (at the same time and in weird, hive mind-like unison)
+
+^ so besides making contrived sci-fi references, there's a bunch of cool stuff you can do with Proxy/Reflect
+
+^ and again, they're pretty new and haven't seen a ton of use yet, so much of what those cool things are is still being actively figured out
+
+^ but IMO the best way to see what something can really do is just mess around with it
+
+^ so I'm gonna show a bunch of stuff you can do with Proxy/reflect, ranging from obviously useful to probably useless
+
+^ and especially for the useful ones, some of you might wonder "why the hell isn't this used everywhere"
+
+^ so i'm gonna throw up one last quote 
+
+---
+
+# Transparency
+
+*“And these are your reasons, my lord?"*
+
+*"Do you think I have others?" said Lord Vetinari. "My motives, as ever, are entirely transparent."*
+
+*Hughnon reflected that 'entirely transparent' meant either that you could see right through them or that you couldn't see them at all.*
+
+[.header: alignment(right)]
+
+##### --Terry Pratchett, The Truth
+
+---
+
+## Transparency
+
+[.quote: alignment(left)]
+>*“And these are your reasons, my lord?"*
+
+[.quote: alignment(right)]
+>*"Do you think I have others?" said Lord Vetinari. "My motives, as ever, are entirely transparent."*
+
+[.quote: alignment(center)]
+>*Hughnon reflected that 'entirely transparent' meant either that you could see right through them or that you couldn't see them at all.*
+--Terry Pratchett, The Truth
+
 ---
 
 ---
@@ -180,7 +236,7 @@ Go through these, progressively getting weirder or more useless. Maybe have a we
 Contact:
 
 [.list: bullet-character(>)]
-- @cixel (Gopher slack)
+- @ehden (CCJS slack)
 - [github.com/cixel](https://github.com/cixel)
 - [ehdens@gmail.com](mailto:ehdens@gmail.com)
 - [ehden@contrastsecurity.com](mailto:ehden@contrastsecurity.com)
@@ -189,6 +245,8 @@ Image Credits:
 
 - [Contrast Security](https://www.contrastsecurity.com)
 - [H2g2bob \[CC0\]](https://upload.wikimedia.org/wikipedia/commons/b/bb/Proxy_concept_en.svg)
+- [Borg](https://www.gettyimages.com/detail/news-photo/patrick-stewart-as-captain-jean-luc-picard-partially-news-photo/468146916)
+- [Join the Team](https://github.com/Contrast-Security-OSS/join-the-team)
 
-^ ![right](gophercolor.png)
+![right](bw.jpg)
 
