@@ -95,7 +95,7 @@ node.js agent engineer @ Contrast Security
 
 ## Terminology 📖
 
-**target**: the object being wrapped
+**target**: the object being wrapped (must be an object, cannot be a literal)
 
 **trap**: method providing intercept behavior for an operation
 
@@ -111,7 +111,43 @@ node.js agent engineer @ Contrast Security
 
 ^ all the traps for the proxy collectively are the handler
 
-^ "now let's see an example of this in action"
+---
+
+## Terminology (cont.)
+
+**invariants**: conditions which must be satisfied by each trap
+
+```javascript
+const s = new String('hello');
+
+const p = new Proxy(s, {
+	get(target, property, receiver) {
+		return 'fish';
+	}
+});
+
+
+console.log(p[0]);
+// TypeError: 'get' on proxy: property '0' is read-only and you tried to do something PRETTY silly there, friend
+```
+
+^ need to mention these
+
+^ invariants are checks which prevent you from doing something really stupid
+
+^ for each trap, there are different sets of invariants
+
+^ MDN does a good job of telling you what these are
+
+^ but they exist to keep you from doing something which makes no sense
+
+^ you can't say, for instance, that the 0th character of a string object is 'fish'
+
+^ this would probably crash v8
+
+^ so instead you get a TypeError
+
+^ so let's see an example of how you can use Proxy
 
 ---
 
@@ -166,11 +202,11 @@ const borg = new Proxy(person, handler);
 
 ---
 
-#*"Star Trek is cool so we should add Proxy to the spec"*
+#*"Star Trek TNG is cool so Proxy should be added to the spec"*
 
-### --W3C, Ecma, and Brendan Eich
+### --W3C, Ecma, Brendan Eich, and Patrick Stewart
 
-#### (at the same time and in weird, hive mind-like unison)
+#### (all at the same time and in weird, hive-mind-like unison)
 
 ^ so besides making contrived sci-fi references, there's a bunch of cool stuff you can do with Proxy/Reflect
 
@@ -182,7 +218,7 @@ const borg = new Proxy(person, handler);
 
 ^ and especially for the useful ones, some of you might wonder "why the hell isn't this used everywhere"
 
-^ so i'm gonna throw up one last quote 
+^ so one last quote
 
 ---
 
@@ -199,6 +235,21 @@ const borg = new Proxy(person, handler);
 --Terry Pratchett, The Truth
 
 ![](vetinari.jpg)
+
+^ "my motives, as ever..."
+
+^ in software especially, the word transparent can mean two completely different things
+
+^ each definition has its value
+
+^ different uses of proxy can be different kinds of transparent, and even both kinds at once under different lenses
+
+^ and I think it's important to think about the attribute of transparency whenever you're doing any kind of instrumentation
+
+^ which is an exercise that takes a bit of getting used to, 
+
+^ so as I go through these, try to think for yourself about where semantic changes may occur, and how each use of a proxy may result in unintended interactions with the outside world
+
 
 ---
 
