@@ -43,7 +43,7 @@ node.js agent engineer @ Contrast Security
 
 ^ Now you might imagine that the implementation details differ a bit from language to language and it's up to each language team to fill up our own toolboxes with different ways to see what we need to see and do what we need to do
 
-^ I'm going to talk about one of these tools in our toolbox, Proxy
+^ I'm going to talk about one of my favorite tools, Proxy
 
 ---
 
@@ -55,11 +55,39 @@ node.js agent engineer @ Contrast Security
 
 ^ When we hear proxy we may think of like a proxy server. It's not that.
 
-^ It's a global object, which I think first appeared in ES2015
+^ here's the quick MDN definition
 
-^ start with a simple definition
+^ basically proxy lets you wrap objects and define custom behavior for a bunch of the basic operations that might be performed on that object
+
+^ first appeared in ES6, so it's pretty new as far as the spec is concerned
+
+^ and that means that people are still figuring out what the hell to do with it
+
+^ it hasn't become very popular yet and
 
 ![right fit](Proxy_concept_en.png)
+
+---
+[.text: alignment(right)]
+[.header: alignment(right)]
+[.footer-style: alignment(right)]
+[.slidenumber-style: alignment(left)]
+
+# Reflect
+
+*Reflect is a built-in object that provides methods for interceptable JavaScript operations. The methods are the same as those of proxy handlers. Reflect is not a function object, so it's not constructible.*[^2]
+
+![left fit](Proxy_concept_en_mirror.png)
+
+[^2]: [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect)
+
+^ Reflect is Proxy's sister object.
+
+^ It's a collection of static methods which let you do all the stuff you need to do inside of a proxy
+
+^ you can use it anywhere, not just with Proxy, but its methods are meant to mirror Proxy traps behavior
+
+^ if that doesn't immediately make sense, it will when you see it in action
 
 ---
 
