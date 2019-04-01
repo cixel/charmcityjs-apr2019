@@ -186,17 +186,19 @@ const borg = new Proxy(person, handler);
 
 ---
 
-## Transparency
-
-[.quote: alignment(left)]
->*“And these are your reasons, my lord?"*
-
-[.quote: alignment(right)]
->*"Do you think I have others?" said Lord Vetinari. "My motives, as ever, are entirely transparent."*
+# Transparency
 
 [.quote: alignment(center)]
+>*“And these are your reasons, my lord?"*
+
+[.quote: alignment(left)]
+>*"Do you think I have others?" said Lord Vetinari. "My motives, as ever, are entirely transparent."*
+
+[.quote: alignment(left)]
 >*Hughnon reflected that 'entirely transparent' meant either that you could see right through them or that you couldn't see them at all.*
 --Terry Pratchett, The Truth
+
+![](vetinari.jpg)
 
 ---
 
@@ -232,6 +234,7 @@ Image Credits:
 - [Contrast Security](https://www.contrastsecurity.com)
 - [H2g2bob \[CC0\]](https://upload.wikimedia.org/wikipedia/commons/b/bb/Proxy_concept_en.svg)
 - [Borg](https://www.gettyimages.com/detail/news-photo/patrick-stewart-as-captain-jean-luc-picard-partially-news-photo/468146916)
+- [Lord Vetinari by juliedillon](https://www.deviantart.com/juliedillon/art/Lord-Vetinari-92120272)
 - [Join the Team](https://github.com/Contrast-Security-OSS/join-the-team)
 
 ![right](bw.jpg)
