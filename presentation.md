@@ -224,7 +224,7 @@ const borg = new Proxy(person, handler);
 
 # Transparency
 
-[.quote: alignment(center)]
+[.quote: alignment(left)]
 >*“And these are your reasons, my lord?"*
 
 [.quote: alignment(left)]
@@ -234,7 +234,7 @@ const borg = new Proxy(person, handler);
 >*Hughnon reflected that 'entirely transparent' meant either that you could see right through them or that you couldn't see them at all.*
 --Terry Pratchett, The Truth
 
-![](vetinari.jpg)
+![right](vetinari.jpg)
 
 ^ "my motives, as ever..."
 
@@ -246,12 +246,86 @@ const borg = new Proxy(person, handler);
 
 ^ and I think it's important to think about the attribute of transparency whenever you're doing any kind of instrumentation
 
-^ which is an exercise that takes a bit of getting used to, 
+^ which is an exercise that takes a bit of getting used to
 
 ^ so as I go through these, try to think for yourself about where semantic changes may occur, and how each use of a proxy may result in unintended interactions with the outside world
 
+---
+
+# [fit] 1. Monkey Patching
+
+![100%](see-no-evil.png) ![100%](hear-no-evil.png) ![100%](speak-no-evil.png)
+
+^ many of you probably know this, but monkey patching is changing or extending the functionality of a function at runtime
+
+^ monkey patching lets you spy on code, change its behavior, add behavior, etc
+
+^ in most connotations it's considered an anti-pattern but it's pretty amazing for doing some things
 
 ---
+
+# Monkey Patching (the old way)
+
+```javascript
+class MyClass {
+	constructor() {}
+
+	someFunction() {
+		// do something
+	}
+}
+
+const someFn = MyClass.prototype.someFunction;
+MyClass.prototype.someFunction = function() {
+	doSomething(this, arguments);
+	const result = someFn.apply(this, arguments);
+	doSomethingElse(this, arguments, result);
+};
+```
+
+^ this is kind of the canonical way to patch
+
+^ save the original function, re-define it, then clobber the reference and throw your own function in
+
+^ this lets you do whatever you want to the this, args, result, etc
+
+---
+
+# Monkey Patching (with Proxy/Reflect)
+
+```javascript
+class MyClass {
+	constructor() {}
+
+	someFunction() {
+		// do something
+	}
+}
+
+MyClass.prototype.someFunction = new Proxy(MyClass.prototype.someFunction, {
+	apply(target, thisArg, args) {
+		doSomething(thisArg, args);
+		const result = Reflect.apply(...arguments);
+		doSomethingElse(thisArg, args, result);
+	}
+})
+```
+
+^ so here is the implementation using a proxy
+
+^ all we're trapping is apply
+
+^ though to be completely correct we'd probably want to trap construct as well
+
+^ nothing super crazy here. so why this vs the old way?
+
+^ well for starters the original function still exists outside of the closure we created
+
+^ but you also get a lot of other things: properties like function length, name, and toString are all perfectly preserved
+
+^ calling .apply directly also makes assumptions about the function never having been clobbered,
+
+^ or having its own apply function which shadows the apply we all know and love
 
 ---
 
@@ -260,6 +334,7 @@ const borg = new Proxy(person, handler);
 Go through these, progressively getting weirder or more useless. Maybe have a weirdness score and a usefulness score?
 
 - spying
+- revokable
 - monkey patching
 - properties which don't exist; impossible to inspect
 - shadow objects - no need to proxy the actual target
