@@ -186,20 +186,6 @@ const borg = new Proxy(person, handler);
 
 ---
 
-# Transparency
-
-*“And these are your reasons, my lord?"*
-
-*"Do you think I have others?" said Lord Vetinari. "My motives, as ever, are entirely transparent."*
-
-*Hughnon reflected that 'entirely transparent' meant either that you could see right through them or that you couldn't see them at all.*
-
-[.header: alignment(right)]
-
-##### --Terry Pratchett, The Truth
-
----
-
 ## Transparency
 
 [.quote: alignment(left)]
