@@ -95,27 +95,66 @@ node.js agent engineer @ Contrast Security
 
 ## Terminology 📖
 
-**target**: the object being wrapped (must be an object, cannot be a literal)
+### **target**: the object being wrapped (_must_ be an object)
 
-**trap**: method providing intercept behavior for an operation
+### **handler**: object which holds traps
 
-**handler**: object which holds traps
+[.code-highlight: all]
+[.code-highlight: 2-4]
+[.code-highlight: 5-9]
+
+```javascript
+const proxy = new Proxy(
+	{
+		foo: 'bar'
+	},
+	{
+		get(tar, prop, recv) { /* ... */ },
+		set(tar, prop, val) { /* ... */ },
+		// ...
+	}
+);
+```
 
 ^ a few definitions to be aware of
+
+^ BUILD
 
 ^ [MAYBE DRINK HERE]
 
 ^ target is kinda self-explanatory
 
-^ traps are the methods that define your custom behavior, name comes from OS traps
+^ BUILD
 
 ^ all the traps for the proxy collectively are the handler
 
 ---
 
-## Terminology (cont.)
+## Terminology 📖
 
-**invariants**: conditions which must be satisfied by each trap
+### **trap**: method providing intercept behavior for an operation
+
+* `apply()`
+* `construct()`
+* `defineProperty()`
+* `deleteProperty()`
+* `get()`
+* `getOwnPropertyDescriptor()`
+* `getPrototypeOf()`
+* `has()`
+* `isExtensible()`
+* `ownKeys()`
+* `preventExtensions()`
+* `set()`
+* `setPrototypeOf()`
+
+^ traps are the methods that define your custom behavior, name comes from OS traps
+
+---
+
+## Terminology 📖
+
+### **invariant**: condition which must be satisfied by a trap
 
 ```javascript
 const s = new String('hello');
@@ -185,7 +224,7 @@ const handler = {
 		return Reflect.get(...arguments);
 	},
 
-	set(target, property, value, receiver) {
+	set(target, property, value) {
 		if (property === 'name') {
 			// don't actually set
 			console.log('Resistance is futile.');
@@ -264,7 +303,7 @@ const borg = new Proxy(person, handler);
 
 ---
 
-# Monkey Patching (the old way)
+# Monkey Patching Functions (the old way)
 
 ```javascript
 class MyClass {
@@ -291,7 +330,7 @@ MyClass.prototype.someFunction = function() {
 
 ---
 
-# Monkey Patching (with Proxy/Reflect)
+# Monkey Patching Functions (with Proxy/Reflect)
 
 ```javascript
 class MyClass {
@@ -326,6 +365,107 @@ MyClass.prototype.someFunction = new Proxy(MyClass.prototype.someFunction, {
 ^ calling .apply directly also makes assumptions about the function never having been clobbered,
 
 ^ or having its own apply function which shadows the apply we all know and love
+
+---
+
+# [fit] 2. Spying on Objects
+
+---
+
+# Spying on Objects
+
+```javascript
+const p = new Proxy({}, {
+	get(tar, prop, recv) {
+		console.log(`getting ${prop}`);
+		return Reflect.get(...arguments);
+	}
+
+	set(tar, prop, value) {
+		console.log(`setting ${prop}`);
+		return Reflect.set(...arguments);
+	}
+});
+
+p.a = '!'; // setting a
+```
+
+^ one of the canonical uses for monkey patching is to add logging
+
+^ rather than redefining all the properties in an object as a setter or getter, you can do this
+
+^ and it lets you spy on gets/sets of things which don't exist on the object yet
+
+^ spying is nice, but if you want you can perform validation as well
+
+
+---
+
+# [fit] 3. Revoking Access to an Object
+
+---
+
+# `Proxy.revocable()`
+
+```javascript
+const obj = { a: 'test' };
+
+const revocable = Proxy.revocable(obj, {
+	// ...
+});
+
+revocable.revoke();
+
+console.log(obj.a); // TypeError
+```
+
+^ Proxy has this static method revocable that gives you a proxy which has a revoke() method on it
+
+^ when that's called, triggering any trap at all in the proxy results in a type error
+
+^ this lets you create like temporary proxies
+
+^ you can use this for a bunch of stuff. it's good if you may not completely trust a component you're giving object references to
+
+^ but maybe you don't want to fully revoke the proxy
+
+---
+
+# Partially Revocable Proxies
+
+```javascript
+class Fickle {
+	constructor() { this.revoked = false; }
+
+	proxy(obj) {
+		const handler = {
+			get: (tar, prop, recv) => {
+				console.log(this);
+				if (this.revoked) throw new TypeError('nah');
+
+				return Reflect.get(tar, prop, recv);
+			}
+		};
+		return new Proxy(obj, handler);
+	}
+
+	revoke() { this.revoked = true; }
+	restore() { this.revoked = false; }
+}
+
+const fickle = new Fickle();
+const revokable = fickle.proxy({ a: 'test' });
+fickle.revoke();
+console.log(revokable.a); // TypeError: nah
+```
+
+^ so this is the first time you'll see us creating an abstraction on Proxy
+
+^ here it's because we need some way to manage this revoked state
+
+^ you can add as many things as you want to Fickle, and revoke them all at once
+
+^
 
 ---
 
