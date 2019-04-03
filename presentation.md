@@ -65,7 +65,9 @@ node.js agent engineer @ Contrast Security
 
 ^ and that means that people are still figuring out what the hell to do with it
 
-^ it hasn't become very popular yet and
+^ part of finding out what you can and should do with something is to explore and just play around with it
+
+^ so this is just going to be a bit of an intro and then some exploration of applications
 
 ![right fit](Proxy_concept_en.png)
 
@@ -247,51 +249,49 @@ const borg = new Proxy(person, handler);
 
 #### (all at the same time and in weird, hive-mind-like unison)
 
+^ toy examples are fun but don't answer: what the hell do you do with Proxy
+
 ^ so besides making contrived sci-fi references, there's a bunch of cool stuff you can do with Proxy/Reflect
 
 ^ and again, they're pretty new and haven't seen a ton of use yet, so much of what those cool things are is still being actively figured out
 
 ^ but IMO the best way to see what something can really do is just mess around with it
 
-^ so I'm gonna show a bunch of stuff you can do with Proxy/reflect, ranging from obviously useful to probably useless
-
-^ and especially for the useful ones, some of you might wonder "why the hell isn't this used everywhere"
-
-^ so one last quote
+^ so I'm gonna show a bunch of stuff you can do with Proxy/reflect, ranging from super useful to probably useless
 
 ---
 
-# Transparency
-
-[.quote: alignment(left)]
->*“And these are your reasons, my lord?"*
-
-[.quote: alignment(left)]
->*"Do you think I have others?" said Lord Vetinari. "My motives, as ever, are entirely transparent."*
-
-[.quote: alignment(left)]
->*Hughnon reflected that 'entirely transparent' meant either that you could see right through them or that you couldn't see them at all.*
---Terry Pratchett, The Truth
-
-![right](vetinari.jpg)
-
-^ "my motives, as ever..."
-
-^ in software especially, the word transparent can mean two completely different things
-
-^ each definition has its value
-
-^ different uses of proxy can be different kinds of transparent, and even both kinds at once under different lenses
-
-^ and I think it's important to think about the attribute of transparency whenever you're doing any kind of instrumentation
-
-^ which is an exercise that takes a bit of getting used to
-
-^ so as I go through these, try to think for yourself about where semantic changes may occur, and how each use of a proxy may result in unintended interactions with the outside world
+# [fit] 1. Logging, Spying, Validating
 
 ---
 
-# [fit] 1. Monkey Patching
+```javascript
+const p = new Proxy({}, {
+	get(tar, prop, recv) {
+		console.log(`getting ${prop}`);
+		return Reflect.get(...arguments);
+	}
+
+	set(tar, prop, value) {
+		console.log(`setting ${prop}`);
+		return Reflect.set(...arguments);
+	}
+});
+
+p.a = '!'; // setting a
+```
+
+^ one of the canonical uses for monkey patching is to add logging
+
+^ rather than redefining all the properties in an object as a setter or getter, you can do this
+
+^ and it lets you spy on gets/sets of things which don't exist on the object yet
+
+^ can also do validation!
+
+---
+
+# [fit] 2. Monkey Patching
 
 ![100%](see-no-evil.png) ![100%](hear-no-evil.png) ![100%](speak-no-evil.png)
 
@@ -303,7 +303,7 @@ const borg = new Proxy(person, handler);
 
 ---
 
-# Monkey Patching Functions (the old way)
+# the "old" way
 
 ```javascript
 class MyClass {
@@ -330,7 +330,7 @@ MyClass.prototype.someFunction = function() {
 
 ---
 
-# Monkey Patching Functions (with Proxy/Reflect)
+# using Proxy/Reflect
 
 ```javascript
 class MyClass {
@@ -368,40 +368,49 @@ MyClass.prototype.someFunction = new Proxy(MyClass.prototype.someFunction, {
 
 ---
 
-# [fit] 2. Spying on Objects
+# [fit] 3. Dynamic APIs
+
+^ this one could be useful for like making SDKs or something,
+
+^ but i think it's just cool
 
 ---
-
-# Spying on Objects
 
 ```javascript
-const p = new Proxy({}, {
-	get(tar, prop, recv) {
-		console.log(`getting ${prop}`);
-		return Reflect.get(...arguments);
-	}
 
-	set(tar, prop, value) {
-		console.log(`setting ${prop}`);
-		return Reflect.set(...arguments);
-	}
-});
+const obj = {};
 
-p.a = '!'; // setting a
+function APIify(obj) {
+	const handler = {
+		get(tar, prop, recv) {
+			if (prop.startsWith('get')) {
+				const name = prop.substring(3);
+				name[0] = name[0].toLowerCase();
+				return function() {
+					// make some REST request?
+				}
+			}
+		}
+	};
+	return new Proxy(obj, handler);
+}
+
+const A = APIify(obj);
+A.getSomeStuff();
+
 ```
 
-^ one of the canonical uses for monkey patching is to add logging
+^ so you can write a get trap which uses the name of the property to generate a function
 
-^ rather than redefining all the properties in an object as a setter or getter, you can do this
+^ and return a function that'll make some http request or something for you
 
-^ and it lets you spy on gets/sets of things which don't exist on the object yet
+^ the bigger point here is-
 
-^ spying is nice, but if you want you can perform validation as well
-
+^ you don't have to use traps to deal with things that already exist
 
 ---
 
-# [fit] 3. Revoking Access to an Object
+# [fit] 4. Revoking Access to an Object
 
 ---
 
@@ -431,7 +440,7 @@ console.log(obj.a); // TypeError
 
 ---
 
-# Partially Revocable Proxies
+## Partially Revocable Proxies
 
 ```javascript
 class Fickle {
@@ -465,24 +474,271 @@ console.log(revokable.a); // TypeError: nah
 
 ^ you can add as many things as you want to Fickle, and revoke them all at once
 
-^
+^ and not all traps need to be revoked anymore, or revoked all the time, you can add whatever logic you want
+
+^ like if the property starts with Q you're fine
+
+^ so... why didn't I just extend Proxy??
+
+^ can't. it's an 'exotic' object, there's no actual prototype. they're weird.
+
+^ you can't extend them, but it's fine. you'll be ok.
 
 ---
 
-# Ideas + delete me
+# [fit] 5. Bodyless Functions
 
-Go through these, progressively getting weirder or more useless. Maybe have a weirdness score and a usefulness score?
+^ this one is gonna seem useless at first
 
-- spying
-- revokable
-- monkey patching
-- properties which don't exist; impossible to inspect
-- shadow objects - no need to proxy the actual target
-- mocking
-- no-body functions
-- membranes
+^ it probably is.
+
+^ but it's fun?
 
 ---
+
+```javascript
+const f = new Proxy(function() {}, {
+	apply(t, thisArg, args) {
+		function actualFunction() {
+			console.log('hi');
+		}
+
+		return Reflect.apply(actualFunction, thisArg, args);
+	}
+});
+
+f(); // hi
+console.log(f.toString()); // 'function () {}'
+```
+
+^ so this one's just weird, but I like it
+
+^ you can pass around a function that looks like nothing
+
+^ but when it runs, it does whatever you want
+
+^ so I don't know why you'd ever do ths
+
+^ but that doesn't mean we should't
+
+^ after all this is about exploring
+
+---
+
+# [fit] 6. Recursive Proxies
+
+---
+
+[.code-highlight: all]
+[.code-highlight: 3]
+[.code-highlight: 5,7]
+[.code-highlight: 6]
+
+```javascript
+const handler = {
+	get(tar, prop, recv) {
+		const result = Reflect.get(...arguments);
+
+		if (result && typeof result === 'object') {
+			return new Proxy(result, handler);
+		}
+
+		return result;
+	}
+}
+```
+
+^ what're we doing here
+
+^ BUILD
+
+^ get the result
+
+^ BUILD
+
+^ check if the result exists and is an object
+
+^ BUILD
+
+^ wrap the result in a proxy, using this handler
+
+^ so when you do a get on that proxy, it'll also be wrapped, and so on
+
+---
+
+# [fit] 7. Membranes
+
+^ so this one is an extension of the last
+
+---
+
+```javascript
+class Membrane {
+	constructor() {
+		// map wrapped --> Mapping
+		this.mappings = new WeakSet();
+	}
+
+	wrap(obj) {
+		const handler = makeHandler(this);
+
+		return new Proxy(obj, handler);
+	}
+
+	includes(val) { return this.mappings.has(val); }
+
+	getMapping(t) { return this.mappings.get(t); }
+
+	// "base case"; do whatever you want in here!
+	onPrimitive(p) { return p; }
+}
+```
+
+^ this is a way to formalize our recursive proxy a bit and build something 
+
+---
+
+```javascript
+/**
+ * Mapping mormalizes the association between wrapped and unwrapped versions of objects in the Membrane.
+ */
+class Mapping {
+  constructor(orig, wrapped) {
+    /** original (fully unwrapped). equals target if this is the only membrane the orig belongs to. */
+    this.orig = orig;
+    /** proxy */
+    this.wrapped = wrapped;
+  }
+}
+```
+
+---
+
+```javascript
+function makeHandler(membrane) {
+	const handler = {
+		get(tar, prop, recv) => {
+			const result = Reflect.get(...arguments);
+
+			if (membrane.includes(tar)) {
+				return membrane.getMapping(tar).wrapped;
+			}
+
+			if (result && typeof result === 'object') {
+				const wrapped = membrane.wrap(result);
+				const mapping = new Mapping(target, wrapped);
+
+				membrane.mappings.set(target, mapping);
+				membrane.mappings.set(wrapped, mapping);
+
+				return wrapped;
+			}
+
+			return membrane.onPrimitive(p);
+		}
+	};
+
+	return handler;
+}
+```
+
+^ talk about safe keys and how irl you also want
+
+^ getOwnPropertyDescriptor, set, delete, defineProperty, and deleteProperty
+
+---
+
+![original fit](membrane.png)
+
+[.hide-footer]
+
+^ here's my attempt at an illustration of that
+
+^ track entire object graphs
+
+^ cirlces are membranes
+
+^ squares are objects
+
+^ green squares are strings, or any other primitive really,
+
+^ don't even have to be primitives---you get to decide what comes out of your membrane
+
+^ but only objects and live in the membrane
+
+^ that onString method can do whatever, I think I had it as onPrimitive in the code snippets
+
+^ we use this in the agent for watching things which come off of reqeusts
+
+---
+
+# Others!
+
+[.build-lists: true]
+
+- specifying default values for fields on objects you don't control creation of
+- cascading property changes - flip a switch to change several values
+- [make arrays accessible as objects](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy#Finding_an_array_item_object_by_its_property)
+
+---
+
+# [fit] This is all super dope, so why isn't Proxy used everywhere?
+
+^ you can do a lot of cool stuff with Proxy
+
+^ and it's built into the language
+
+^ and has been for a couple of years now
+
+^ so why aren't people swarming?
+
+^ when I first saw them I thought I had found the holy grail
+
+^ and don't get me wrong, this thing is incredibly useful
+
+^ but the bulk of the issues I had came down to one thing
+
+---
+
+# Transparency
+
+[.quote: alignment(left)]
+>*“And these are your reasons, my lord?"*
+
+[.quote: alignment(left)]
+>*"Do you think I have others?" said Lord Vetinari. "My motives, as ever, are entirely transparent."*
+
+[.quote: alignment(left)]
+>*Hughnon reflected that 'entirely transparent' meant either that you could see right through them or that you couldn't see them at all.*
+--Terry Pratchett, The Truth
+
+![right](vetinari.jpg)
+
+^ "my motives, as ever..."
+
+^ in software especially, the word transparent can mean two completely different things
+
+^ each definition has its value
+
+^ different uses of proxy can be different kinds of transparent, and even both kinds at once under different lenses
+
+^ and I think it's important to think about the attribute of transparency whenever you're doing any kind of instrumentation
+
+^ which is an exercise that takes a bit of getting used to
+
+^ so as I go through these, try to think for yourself about where semantic changes may occur, and how each use of a proxy may result in unintended interactions with the outside world
+
+^ the bottom line is none of this is free.
+
+^ right now i think a lot of the cooler applications of Proxy are gated behind the need to predict and understand what you're paying to use it
+
+^ but this is javascript, and people are going to find ways to build really cool, robust APIs from this stuff
+
+^ so just keep your eyes open, because I think Proxy is just getting started
+
+---
+
+__The End!__
 
 [.autoscale: true]
 [.header: alignment(left)]
@@ -494,6 +750,10 @@ Contact:
 - [github.com/cixel](https://github.com/cixel)
 - [ehdens@gmail.com](mailto:ehdens@gmail.com)
 - [ehden@contrastsecurity.com](mailto:ehden@contrastsecurity.com)
+
+Presentation Materials:
+
+- [github.com/cixel/charmcityjs-apr2019](https://github.com/cixel/charmcityjs-apr2019)
 
 Image Credits:
 
