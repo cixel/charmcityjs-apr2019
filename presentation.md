@@ -14,6 +14,8 @@ footer: Ehden Sinai @ charmCityJs - 4/3/2019
 
 #### (So It Kinda Ruins the Title)
 
+^ *useful talk notes*
+
 ---
 
 [.autoscale: true]
@@ -47,6 +49,8 @@ node.js agent engineer @ Contrast Security
 
 ^ I'm going to talk about one of my favorite tools, Proxy
 
+^ WHEN WE HEAR PROXY, WE TEND TO THINK LIKE A WEB SERVER PROXY
+
 ---
 
 # Proxy
@@ -55,7 +59,7 @@ node.js agent engineer @ Contrast Security
 
 [^1]: [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 
-^ When we hear proxy we may think of like a proxy server. It's not that.
+^ It's not that.
 
 ^ here's the quick MDN definition
 
@@ -281,7 +285,7 @@ const p = new Proxy({}, {
 p.a = '!'; // setting a
 ```
 
-^ one of the canonical uses for monkey patching is to add logging
+^ one of the most basic uses is to add logging or validation
 
 ^ rather than redefining all the properties in an object as a setter or getter, you can do this
 
@@ -372,7 +376,7 @@ MyClass.prototype.someFunction = new Proxy(MyClass.prototype.someFunction, {
 
 ^ this one could be useful for like making SDKs or something,
 
-^ but i think it's just cool
+^ i dunno, I just think it's cool
 
 ---
 
@@ -406,11 +410,15 @@ A.getSomeStuff();
 
 ^ the bigger point here is-
 
-^ you don't have to use traps to deal with things that already exist
+^ you don't have to use traps to deal with things that already exist on the object
 
 ---
 
 # [fit] 4. Revoking Access to an Object
+
+^ there's two ways to do this
+
+^ the first is:
 
 ---
 
@@ -564,9 +572,11 @@ const handler = {
 
 ^ so when you do a get on that proxy, it'll also be wrapped, and so on
 
+^ you are encapsulating the entire object graph
+
 ---
 
-# [fit] 7. Membranes
+# [fit] 7. Proxy Membranes
 
 ^ so this one is an extension of the last
 
@@ -600,7 +610,7 @@ class Membrane {
 
 ```javascript
 /**
- * Mapping mormalizes the association between wrapped and unwrapped versions of objects in the Membrane.
+ * Mapping formalizes the association between wrapped and unwrapped versions of objects in the Membrane.
  */
 class Mapping {
   constructor(orig, wrapped) {
@@ -654,13 +664,11 @@ function makeHandler(membrane) {
 
 ^ here's my attempt at an illustration of that
 
-^ track entire object graphs
+^ these are also recursive proxies, so we're still encapsulating entire object graphs
 
-^ cirlces are membranes
+^ but this abstraction allows us to define custom behaviors at each point and even compose multiple membranes
 
-^ squares are objects
-
-^ green squares are strings, or any other primitive really,
+^ explain what the symbols are
 
 ^ don't even have to be primitives---you get to decide what comes out of your membrane
 
